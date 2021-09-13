@@ -10,18 +10,22 @@ from gamma_viewer import GammaViewer
 from IPython.display import display
 
 #ARS functions
-def submit_to_ars(m,ars_url='https://ars.ci.transltr.io/ars/api',arax_url='https://arax.ncats.io'):
+def submit_to_ars(m,ars_url='https://ars.transltr.io/ars/api',arax_url='https://arax.ncats.io'):
     submit_url=f'{ars_url}/submit'
+    print(submit_url)
     response = requests.post(submit_url,json=m)
+    print(response.status_code)
     try:
         message_id = response.json()['pk']
-    except:
+    except Exception as e:
+        print(submit_url)
         print('fail')
+        print(e)
         message_id = None
     print(f'{arax_url}/?source=ARS&id={message_id}')
     return message_id
 
-def retrieve_ars_results(mid,ars_url='https://ars.ci.transltr.io/ars/api'):
+def retrieve_ars_results(mid,ars_url='https://ars.transltr.io/ars/api'):
     message_url = f'{ars_url}/messages/{mid}?trace=y'
     response = requests.get(message_url)
     j = response.json()
@@ -86,10 +90,11 @@ def print_errors(strider_result):
 def post(name,url,message,params=None):
     """Wrap a post in some basic error reporting"""
     start = dt.now()
+    s = requests.session()
     if params is None:
-        response = requests.post(url,json=message)
+        response = s.post(url,json=message)
     else:
-        response = requests.post(url,json=message,params=params)
+        response = s.post(url,json=message,params=params)
     end = dt.now()
     if not response.status_code == 200:
         print(name, 'error:',response.status_code)
@@ -162,16 +167,16 @@ def automat(db,message):
     response = post(f'automat/{db}',automat_url,message)
     return response
 
-def strider(message):
-    url = 'https://strider.renci.org/1.1/query'
+def strider(message,version='1.2'):
+    url = f'https://strider.renci.org/{version}/query'
     strider_answer = post('strider',url,message)
     return strider_answer
 
-def aragorn(message,coalesce_type='xnone'):
+def aragorn(message,coalesce_type='xnone',version='1.2'):
     if coalesce_type == 'xnone':
-        answer = post('aragorn','https://aragorn.renci.org/1.1/query',message)
+        answer = post('aragorn',f'https://aragorn.renci.org/{version}/query',message)
     else:
-        answer = post('aragorn','https://aragorn.renci.org/1.1/query',message, params={'answer_coalesce_type':coalesce_type})
+        answer = post('aragorn',f'https://aragorn.renci.org/{version}/query',message, params={'answer_coalesce_type':coalesce_type})
     return answer
 
 def local_aragorn(message):
@@ -204,15 +209,20 @@ def ac_to_table(aragorn_result, mnode):
     merged_count = []
     method = []
     extra = []
+    scores = []
     for res_i, result in enumerate(aragorn_result['message']['results']):
         # scores.append(result['score'])
         answer_node_count.append(len(result['node_bindings']))
         merged_count.append(len(result['node_bindings'][mnode]))
+        scores.append(result['score'])
         try:
-            method.append(result['node_bindings'][mnode][0]['coalescence_method'])
+            mn = result['node_bindings'][mnode][0]
+            for att in mn['attributes']:
+                if att['original_attribute_name'] == 'coalescence_method':
+                    method.append(att['value'])
         except:
             method.append('Original')
-    df = pd.DataFrame({'N_Answer_Nodes': answer_node_count, 'N_Merged_Nodes': merged_count, 'Method': method})
+    df = pd.DataFrame({'N_Answer_Nodes': answer_node_count, 'N_Merged_Nodes': merged_count, 'Method': method, 'Score': scores})
     return df
 
 

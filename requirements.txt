@@ -3,3 +3,4 @@ requests
 pydantic>=1.8.2
 reasoner-pydantic==1.2.0.2
 fastapi
+reasoner-validator

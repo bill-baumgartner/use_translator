@@ -35,7 +35,7 @@ def get_kg_edge_source_provenance(knowledge_graph):
     # returns the original knowlege sources for the edges in the input KG. Each 
     # original knowledge source is mapped to counts of aggregator knowledge sources 
     # that provided the data in a nested dictionary structure.
-    edges = [v for k,v in response["message"]["knowledge_graph"]["edges"].items()]
+    edges = [v for k,v in knowledge_graph["edges"].items()]
     attribute_lists = [e["attributes"] for e in edges]
 
     # populate the sources dictionary with key = original source and value = a set 

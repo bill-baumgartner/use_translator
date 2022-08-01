@@ -42,33 +42,33 @@ def get_kg_edge_source_provenance(knowledge_graph):
     # containing aggregator sources that are associated with the original source
     sources = {}
     for alist in attribute_lists:
-    aggregators = list()
-    for a in alist:
-        if (a["attribute_type_id"] == "biolink:original_knowledge_source"):
-        original_source= a["value"]
-        # print(original_source)
-        if (a["attribute_type_id"] == "biolink:aggregator_knowledge_source"):
-        v = a["value"]
-        # some values for the aggregator knowledge source are strings, and 
-        # some are lists so we handle both -- what is the TRAPI spec?
-        # The list values are ['infores:biothings-explorer']
-        if type(v) == list:
-            [aggregators.append(s) for s in v]
-            # print(v)
-        else: 
-            aggregators.append(v)
-    aggregators.sort()
-    aggregator_source = '|'.join(aggregators)
-    if original_source in sources:
-        innerdict = sources[original_source]
-        if aggregator_source in innerdict:
-        innerdict[aggregator_source] += 1
-        else: 
-        innerdict[aggregator_source] = 1
-    else:
-        innerdict = {}
-        innerdict[aggregator_source] = 1
-        sources[original_source] = innerdict
+        aggregators = list()
+        for a in alist:
+            if (a["attribute_type_id"] == "biolink:original_knowledge_source"):
+            original_source= a["value"]
+            # print(original_source)
+            if (a["attribute_type_id"] == "biolink:aggregator_knowledge_source"):
+            v = a["value"]
+            # some values for the aggregator knowledge source are strings, and 
+            # some are lists so we handle both -- what is the TRAPI spec?
+            # The list values are ['infores:biothings-explorer']
+            if type(v) == list:
+                [aggregators.append(s) for s in v]
+                # print(v)
+            else: 
+                aggregators.append(v)
+        aggregators.sort()
+        aggregator_source = '|'.join(aggregators)
+        if original_source in sources:
+            innerdict = sources[original_source]
+            if aggregator_source in innerdict:
+            innerdict[aggregator_source] += 1
+            else: 
+            innerdict[aggregator_source] = 1
+        else:
+            innerdict = {}
+            innerdict[aggregator_source] = 1
+            sources[original_source] = innerdict
     return sources
 
 def get_original_source_edges(knowledge_graph, original_source_infores):

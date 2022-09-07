@@ -10,7 +10,7 @@ def get_node_label(node_id, node):
     return node_id + "\n" + ','.join(node["ids"])
   return node_id + "\n" + ','.join(node["categories"])
 
-def display_query(trapi_json):
+def display_query(trapi_json, fig_dim):
 # create a simple graphical depiction of a TRAPI query 
   query_graph = trapi_json["message"]["query_graph"]
   node_labels = dict([(node_id, get_node_label(node_id, node)) for node_id, node in query_graph["nodes"].items()])
@@ -23,7 +23,7 @@ def display_query(trapi_json):
   G = nx.DiGraph()
   G.add_edges_from(edges)
   
-  plt.figure(figsize=(10,10))
+  plt.figure(figsize=(fig_dim, fig_dim))
   pos = nx.spring_layout(G)
   nx.draw(G, with_labels=True, node_color='pink', node_size = 5000, 
           width=2, alpha=0.9, arrows=True, arrowsize=20, edge_cmap=plt.cm.Blues, pos = pos)
